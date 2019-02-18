@@ -160,7 +160,16 @@ func (z *Zone) Lookup(state request.Request, qname string) ([]dns.RR, []dns.RR, 
 			return z.additionalProcessing(state, elem, rrs)
 		}
 
-		rrs := elem.Types(qtype, qname)
+		var rrs []dns.RR
+
+		// If type ANY we have to get all the records for the qname
+		if qtype == dns.TypeANY {
+			for i := 0; i <= 254; i++ {
+				rrs = append(rrs, wildElem.Types(uint16(i), qname)...)
+			}
+		} else {
+			rrs = wildElem.Types(qtype, qname)
+		}
 
 		// NODATA
 		if len(rrs) == 0 {
@@ -196,7 +205,16 @@ func (z *Zone) Lookup(state request.Request, qname string) ([]dns.RR, []dns.RR, 
 			return z.additionalProcessing(state, wildElem, rrs)
 		}
 
-		rrs := wildElem.Types(qtype, qname)
+		var rrs []dns.RR
+
+		// If type ANY we have to get all the records for the qname
+		if qtype == dns.TypeANY {
+			for i := 0; i <= 254; i++ {
+				rrs = append(rrs, wildElem.Types(uint16(i), qname)...)
+			}
+		} else {
+			rrs = wildElem.Types(qtype, qname)
+		}
 
 		// NODATA response.
 		if len(rrs) == 0 {
